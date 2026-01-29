@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   Safe Area 适配 (iOS 刘海屏 / Android 状态栏)
+   ============================================ */
+
+/* 确保 viewport-fit=cover 生效 */
+html {
+  /* 支持 env() 的浏览器会自动处理安全区域 */
+  padding: 0;
+  margin: 0;
+}
+
+/* 根容器适配 */
+#root {
+  min-height: 100vh;
+  /* iOS Safari 100vh 问题修复 */
+  min-height: -webkit-fill-available;
+}
+
+/* 自定义 Safe Area CSS 变量（用于不支持 env() 的情况） */
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+}
+
+/* ============================================
+   滚动条美化（可选）
+   ============================================ */
+
+/* Webkit 浏览器滚动条 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* 暗色模式滚动条 */
+.dark ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* ============================================
+   动画相关
+   ============================================ */
+
+/* 确保过渡动画流畅 */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 禁用选中高亮（移动端） */
+button, a {
+  -webkit-touch-callout: none;
+  user-select: none;
+}

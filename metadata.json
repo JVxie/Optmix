@@ -1,0 +1,5 @@
+{
+  "name": "OptiMix - 最优配比计算器",
+  "description": "利用线性规划，帮助用户计算原料的最优配比，降低成本。",
+  "requestFramePermissions": []
+}
