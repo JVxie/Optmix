@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
-import { Material, Indicator } from '../types';
+import { Material, Indicator } from '@/types';
 import { Plus, Trash2, Edit2, AlertCircle, ListChecks, Check } from 'lucide-react';
-import Modal from './Modal';
+import Modal from '@/components/common/Modal';
 
 interface Props {
   materials: Material[];
@@ -16,16 +16,16 @@ const MaterialManager: React.FC<Props> = ({ materials, indicators, onChange }) =
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
-  
+
   // Batch Mode
   const [isBatchMode, setIsBatchMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showBatchDeleteConfirm, setShowBatchDeleteConfirm] = useState(false);
-  
-  const [formData, setFormData] = useState<{ 
-    name: string; 
-    price: string; 
-    values: Record<string, string> 
+
+  const [formData, setFormData] = useState<{
+    name: string;
+    price: string;
+    values: Record<string, string>
   }>({
     name: '',
     price: '',
@@ -46,7 +46,7 @@ const MaterialManager: React.FC<Props> = ({ materials, indicators, onChange }) =
     Object.keys(mat.indicatorValues).forEach(k => {
       valuesStr[k] = String(mat.indicatorValues[k]);
     });
-    
+
     setFormData({
       name: mat.name,
       price: String(mat.price),
@@ -64,7 +64,7 @@ const MaterialManager: React.FC<Props> = ({ materials, indicators, onChange }) =
       setError('请输入货物名称');
       return;
     }
-    
+
     if (!formData.price || formData.price.trim() === '') {
       setError('请输入单价');
       return;
@@ -163,66 +163,65 @@ const MaterialManager: React.FC<Props> = ({ materials, indicators, onChange }) =
   return (
     <div className="h-full flex flex-col">
       <div className="mb-4 flex justify-between items-center h-10">
-         {isBatchMode ? (
-            <div 
-              className="flex items-center gap-2 animate-in fade-in duration-200 cursor-pointer group"
-              onClick={toggleSelectAll}
-            >
-               <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all duration-200 ${
-                 isAllSelected
-                 ? 'bg-emerald-600 border-emerald-600 dark:bg-emerald-500 dark:border-emerald-500'
-                 : 'bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-500 group-hover:border-emerald-400 dark:group-hover:border-emerald-400'
-               }`}>
-                 <Check size={12} className={`text-white transform transition-transform duration-200 ${isAllSelected ? 'scale-100' : 'scale-0'}`} strokeWidth={3} />
-               </div>
-               <span className="text-sm text-slate-500 dark:text-slate-400 font-medium select-none">全选 ({selectedIds.size}/{materials.length})</span>
+        {isBatchMode ? (
+          <div
+            className="flex items-center gap-2 animate-in fade-in duration-200 cursor-pointer group"
+            onClick={toggleSelectAll}
+          >
+            <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all duration-200 ${isAllSelected
+                ? 'bg-emerald-600 border-emerald-600 dark:bg-emerald-500 dark:border-emerald-500'
+                : 'bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-500 group-hover:border-emerald-400 dark:group-hover:border-emerald-400'
+              }`}>
+              <Check size={12} className={`text-white transform transition-transform duration-200 ${isAllSelected ? 'scale-100' : 'scale-0'}`} strokeWidth={3} />
             </div>
-         ) : <div></div>}
+            <span className="text-sm text-slate-500 dark:text-slate-400 font-medium select-none">全选 ({selectedIds.size}/{materials.length})</span>
+          </div>
+        ) : <div></div>}
 
-         <div className="flex gap-2">
-           {isBatchMode ? (
-              <>
-                 <button
-                    onClick={() => setShowBatchDeleteConfirm(true)}
-                    disabled={selectedIds.size === 0}
-                    className="bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors shadow-sm"
-                  >
-                    <Trash2 size={16} /> 删除 ({selectedIds.size})
-                  </button>
-                  <button
-                    onClick={() => {
-                      setIsBatchMode(false);
-                      setSelectedIds(new Set());
-                    }}
-                    className="bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
-                  >
-                    完成
-                  </button>
-              </>
-           ) : (
-             <>
-               <button
-                   onClick={() => setIsBatchMode(true)}
-                   className="text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors"
-                 >
-                   <ListChecks size={18} /> 批量
-                 </button>
-               <button
+        <div className="flex gap-2">
+          {isBatchMode ? (
+            <>
+              <button
+                onClick={() => setShowBatchDeleteConfirm(true)}
+                disabled={selectedIds.size === 0}
+                className="bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors shadow-sm"
+              >
+                <Trash2 size={16} /> 删除 ({selectedIds.size})
+              </button>
+              <button
+                onClick={() => {
+                  setIsBatchMode(false);
+                  setSelectedIds(new Set());
+                }}
+                className="bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
+              >
+                完成
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => setIsBatchMode(true)}
+                className="text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors"
+              >
+                <ListChecks size={18} /> 批量
+              </button>
+              <button
                 onClick={openAddModal}
                 className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors shadow-sm"
               >
                 <Plus size={16} /> 新增
               </button>
-             </>
-           )}
-         </div>
+            </>
+          )}
+        </div>
       </div>
 
       {/* List */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 overflow-y-auto pb-4 pr-1 flex-1 content-start">
         {materials.map(mat => (
-          <div 
-            key={mat.id} 
+          <div
+            key={mat.id}
             onClick={() => isBatchMode && toggleSelection(mat.id)}
             className={`group bg-white dark:bg-slate-800 rounded-xl shadow-sm border transition-colors relative overflow-hidden flex flex-col cursor-pointer
              ${isBatchMode && selectedIds.has(mat.id)
@@ -230,64 +229,63 @@ const MaterialManager: React.FC<Props> = ({ materials, indicators, onChange }) =
                 : 'border-slate-200 dark:border-slate-700 hover:border-emerald-300 dark:hover:border-emerald-700'}
             `}
           >
-             {isBatchMode && (
-                <div className="absolute top-4 left-4 z-10">
-                   <div 
-                      className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all duration-200 ${
-                        selectedIds.has(mat.id)
-                        ? 'bg-emerald-600 border-emerald-600 dark:bg-emerald-500 dark:border-emerald-500'
-                        : 'bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-500 hover:border-emerald-400 dark:hover:border-emerald-400'
-                      }`}
-                    >
-                      <Check size={12} className={`text-white transform transition-transform duration-200 ${selectedIds.has(mat.id) ? 'scale-100' : 'scale-0'}`} strokeWidth={3} />
-                    </div>
+            {isBatchMode && (
+              <div className="absolute top-4 left-4 z-10">
+                <div
+                  className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all duration-200 ${selectedIds.has(mat.id)
+                      ? 'bg-emerald-600 border-emerald-600 dark:bg-emerald-500 dark:border-emerald-500'
+                      : 'bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-500 hover:border-emerald-400 dark:hover:border-emerald-400'
+                    }`}
+                >
+                  <Check size={12} className={`text-white transform transition-transform duration-200 ${selectedIds.has(mat.id) ? 'scale-100' : 'scale-0'}`} strokeWidth={3} />
                 </div>
-             )}
+              </div>
+            )}
 
-             <div className={`p-5 flex-1 transition-all ${isBatchMode ? 'pl-10' : ''}`}>
-                <div className="flex justify-between items-start mb-3">
-                  <h4 className="font-bold text-lg text-slate-800 dark:text-slate-100">{mat.name}</h4>
-                  <div className="flex gap-2">
-                     <span className="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800 text-xs px-2.5 py-1 rounded-full font-bold">
-                      ¥{mat.price}/吨
+            <div className={`p-5 flex-1 transition-all ${isBatchMode ? 'pl-10' : ''}`}>
+              <div className="flex justify-between items-start mb-3">
+                <h4 className="font-bold text-lg text-slate-800 dark:text-slate-100">{mat.name}</h4>
+                <div className="flex gap-2">
+                  <span className="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800 text-xs px-2.5 py-1 rounded-full font-bold">
+                    ¥{mat.price}/吨
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-1.5 mt-2 bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-100 dark:border-slate-700">
+                {indicators.slice(0, 4).map(ind => (
+                  <div key={ind.id} className="flex justify-between text-sm">
+                    <span className="text-slate-500 dark:text-slate-400">{ind.name}</span>
+                    <span className="font-medium text-slate-700 dark:text-slate-300">
+                      {mat.indicatorValues[ind.id]} <span className="text-xs text-slate-400 dark:text-slate-500">{ind.unit}</span>
                     </span>
                   </div>
-                </div>
-                
-                <div className="space-y-1.5 mt-2 bg-slate-50 dark:bg-slate-900/50 p-3 rounded-lg border border-slate-100 dark:border-slate-700">
-                  {indicators.slice(0, 4).map(ind => (
-                    <div key={ind.id} className="flex justify-between text-sm">
-                      <span className="text-slate-500 dark:text-slate-400">{ind.name}</span>
-                      <span className="font-medium text-slate-700 dark:text-slate-300">
-                        {mat.indicatorValues[ind.id]} <span className="text-xs text-slate-400 dark:text-slate-500">{ind.unit}</span>
-                      </span>
-                    </div>
-                  ))}
-                  {indicators.length > 4 && (
-                    <p className="text-xs text-slate-400 dark:text-slate-500 text-center mt-1">...及其他 {indicators.length - 4} 项指标</p>
-                  )}
-                  {indicators.length === 0 && (
-                    <p className="text-xs text-slate-400 dark:text-slate-500 text-center">暂无指标数据</p>
-                  )}
-                </div>
-             </div>
-             
-             {!isBatchMode && (
-               <div className="border-t border-slate-100 dark:border-slate-700 p-2 flex justify-end gap-2 bg-slate-50/50 dark:bg-slate-800/50">
-                 <button
-                   onClick={(e) => { e.stopPropagation(); openEditModal(mat); }}
-                   className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-md transition-colors"
-                 >
-                   <Edit2 size={14} /> 修改
-                 </button>
-                 <button
-                   onClick={(e) => { e.stopPropagation(); handleDeleteClick(mat.id); }}
-                   className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md transition-colors"
-                 >
-                   <Trash2 size={14} /> 删除
-                 </button>
-               </div>
-             )}
+                ))}
+                {indicators.length > 4 && (
+                  <p className="text-xs text-slate-400 dark:text-slate-500 text-center mt-1">...及其他 {indicators.length - 4} 项指标</p>
+                )}
+                {indicators.length === 0 && (
+                  <p className="text-xs text-slate-400 dark:text-slate-500 text-center">暂无指标数据</p>
+                )}
+              </div>
+            </div>
+
+            {!isBatchMode && (
+              <div className="border-t border-slate-100 dark:border-slate-700 p-2 flex justify-end gap-2 bg-slate-50/50 dark:bg-slate-800/50">
+                <button
+                  onClick={(e) => { e.stopPropagation(); openEditModal(mat); }}
+                  className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-md transition-colors"
+                >
+                  <Edit2 size={14} /> 修改
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); handleDeleteClick(mat.id); }}
+                  className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-md transition-colors"
+                >
+                  <Trash2 size={14} /> 删除
+                </button>
+              </div>
+            )}
           </div>
         ))}
         {materials.length === 0 && (
@@ -337,7 +335,7 @@ const MaterialManager: React.FC<Props> = ({ materials, indicators, onChange }) =
           <div className="pt-2">
             <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-3 uppercase tracking-wider border-b border-slate-100 dark:border-slate-700 pb-1">指标参数设置</h4>
             {indicators.length === 0 ? (
-               <p className="text-sm text-amber-600 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400 p-2 rounded">请先在指标管理中添加指标。</p>
+              <p className="text-sm text-amber-600 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400 p-2 rounded">请先在指标管理中添加指标。</p>
             ) : (
               <div className="grid grid-cols-2 gap-3">
                 {indicators.map(ind => (
@@ -402,7 +400,7 @@ const MaterialManager: React.FC<Props> = ({ materials, indicators, onChange }) =
           </div>
         </div>
       </Modal>
-      
+
       {/* Batch Delete Confirmation Modal */}
       <Modal
         isOpen={showBatchDeleteConfirm}

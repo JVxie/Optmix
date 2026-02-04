@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
-import { Indicator } from '../types';
+import { Indicator } from '@/types';
 import { Plus, Trash2, Edit2, AlertCircle, ListChecks, Check } from 'lucide-react';
-import Modal from './Modal';
+import Modal from '@/components/common/Modal';
 
 interface Props {
   indicators: Indicator[];
@@ -15,14 +15,14 @@ const IndicatorManager: React.FC<Props> = ({ indicators, onChange }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
-  
+
   // Batch Mode
   const [isBatchMode, setIsBatchMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showBatchDeleteConfirm, setShowBatchDeleteConfirm] = useState(false);
-  
-  const [formData, setFormData] = useState<Partial<Indicator>>({ 
-    name: '', unit: '', min: 0, max: 100 
+
+  const [formData, setFormData] = useState<Partial<Indicator>>({
+    name: '', unit: '', min: 0, max: 100
   });
   const [error, setError] = useState('');
 
@@ -134,59 +134,58 @@ const IndicatorManager: React.FC<Props> = ({ indicators, onChange }) => {
   return (
     <div className="h-full flex flex-col">
       <div className="mb-4 flex justify-between items-center h-10">
-         {isBatchMode ? (
-            <div 
-              className="flex items-center gap-2 animate-in fade-in duration-200 cursor-pointer group"
-              onClick={toggleSelectAll}
-            >
-               <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all duration-200 ${
-                 isAllSelected
-                 ? 'bg-blue-600 border-blue-600 dark:bg-blue-500 dark:border-blue-500'
-                 : 'bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-500 group-hover:border-blue-400 dark:group-hover:border-blue-400'
-               }`}>
-                 <Check size={12} className={`text-white transform transition-transform duration-200 ${isAllSelected ? 'scale-100' : 'scale-0'}`} strokeWidth={3} />
-               </div>
-               <span className="text-sm text-slate-500 dark:text-slate-400 font-medium select-none">全选 ({selectedIds.size}/{indicators.length})</span>
+        {isBatchMode ? (
+          <div
+            className="flex items-center gap-2 animate-in fade-in duration-200 cursor-pointer group"
+            onClick={toggleSelectAll}
+          >
+            <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all duration-200 ${isAllSelected
+                ? 'bg-blue-600 border-blue-600 dark:bg-blue-500 dark:border-blue-500'
+                : 'bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-500 group-hover:border-blue-400 dark:group-hover:border-blue-400'
+              }`}>
+              <Check size={12} className={`text-white transform transition-transform duration-200 ${isAllSelected ? 'scale-100' : 'scale-0'}`} strokeWidth={3} />
             </div>
-         ) : <div></div>}
-         
-         <div className="flex gap-2">
-            {isBatchMode ? (
-               <>
-                 <button
-                    onClick={() => setShowBatchDeleteConfirm(true)}
-                    disabled={selectedIds.size === 0}
-                    className="bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors shadow-sm"
-                  >
-                    <Trash2 size={16} /> 删除 ({selectedIds.size})
-                  </button>
-                  <button
-                    onClick={() => {
-                      setIsBatchMode(false);
-                      setSelectedIds(new Set());
-                    }}
-                    className="bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
-                  >
-                    完成
-                  </button>
-               </>
-            ) : (
-              <>
-                 <button
-                   onClick={() => setIsBatchMode(true)}
-                   className="text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors"
-                 >
-                   <ListChecks size={18} /> 批量
-                 </button>
-                 <button
-                    onClick={openAddModal}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors shadow-sm"
-                  >
-                    <Plus size={16} /> 新增
-                  </button>
-              </>
-            )}
-         </div>
+            <span className="text-sm text-slate-500 dark:text-slate-400 font-medium select-none">全选 ({selectedIds.size}/{indicators.length})</span>
+          </div>
+        ) : <div></div>}
+
+        <div className="flex gap-2">
+          {isBatchMode ? (
+            <>
+              <button
+                onClick={() => setShowBatchDeleteConfirm(true)}
+                disabled={selectedIds.size === 0}
+                className="bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors shadow-sm"
+              >
+                <Trash2 size={16} /> 删除 ({selectedIds.size})
+              </button>
+              <button
+                onClick={() => {
+                  setIsBatchMode(false);
+                  setSelectedIds(new Set());
+                }}
+                className="bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm"
+              >
+                完成
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => setIsBatchMode(true)}
+                className="text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 px-3 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors"
+              >
+                <ListChecks size={18} /> 批量
+              </button>
+              <button
+                onClick={openAddModal}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors shadow-sm"
+              >
+                <Plus size={16} /> 新增
+              </button>
+            </>
+          )}
+        </div>
       </div>
 
       <div className="space-y-3 overflow-y-auto pr-1 pb-4 flex-1">
@@ -196,28 +195,27 @@ const IndicatorManager: React.FC<Props> = ({ indicators, onChange }) => {
           </div>
         ) : (
           indicators.map((ind) => (
-            <div 
-              key={ind.id} 
+            <div
+              key={ind.id}
               onClick={() => isBatchMode && toggleSelection(ind.id)}
               className={`bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 group transition-colors cursor-pointer relative
-                ${isBatchMode && selectedIds.has(ind.id) 
-                  ? 'border-blue-400 dark:border-blue-600 ring-1 ring-blue-400 dark:ring-blue-600' 
+                ${isBatchMode && selectedIds.has(ind.id)
+                  ? 'border-blue-400 dark:border-blue-600 ring-1 ring-blue-400 dark:ring-blue-600'
                   : 'border-slate-200 dark:border-slate-700 hover:border-blue-300 dark:hover:border-blue-600'}
               `}
             >
               {/* Batch Mode Checkbox Overlay */}
               {isBatchMode && (
-                 <div className="absolute top-4 left-4 z-10">
-                    <div 
-                      className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all duration-200 ${
-                        selectedIds.has(ind.id)
+                <div className="absolute top-4 left-4 z-10">
+                  <div
+                    className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all duration-200 ${selectedIds.has(ind.id)
                         ? 'bg-blue-600 border-blue-600 dark:bg-blue-500 dark:border-blue-500'
                         : 'bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-500 hover:border-blue-400 dark:hover:border-blue-400'
                       }`}
-                    >
-                      <Check size={12} className={`text-white transform transition-transform duration-200 ${selectedIds.has(ind.id) ? 'scale-100' : 'scale-0'}`} strokeWidth={3} />
-                    </div>
-                 </div>
+                  >
+                    <Check size={12} className={`text-white transform transition-transform duration-200 ${selectedIds.has(ind.id) ? 'scale-100' : 'scale-0'}`} strokeWidth={3} />
+                  </div>
+                </div>
               )}
 
               <div className={`flex-1 w-full grid grid-cols-2 sm:grid-cols-4 gap-4 transition-all ${isBatchMode ? 'pl-8' : ''}`}>
@@ -238,7 +236,7 @@ const IndicatorManager: React.FC<Props> = ({ indicators, onChange }) => {
                   <div className="text-slate-600 dark:text-slate-300 font-mono">{ind.max}</div>
                 </div>
               </div>
-              
+
               {!isBatchMode && (
                 <div className="flex items-center gap-2 self-end sm:self-center">
                   <button
@@ -275,7 +273,7 @@ const IndicatorManager: React.FC<Props> = ({ indicators, onChange }) => {
               {error}
             </div>
           )}
-          
+
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2 sm:col-span-1">
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">指标名称 <span className="text-red-500">*</span></label>
@@ -298,7 +296,7 @@ const IndicatorManager: React.FC<Props> = ({ indicators, onChange }) => {
               />
             </div>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">最小值 <span className="text-red-500">*</span></label>
@@ -321,7 +319,7 @@ const IndicatorManager: React.FC<Props> = ({ indicators, onChange }) => {
           </div>
 
           <div className="pt-4 flex gap-3">
-             <button
+            <button
               onClick={handleSave}
               className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-medium transition-colors"
             >
@@ -346,7 +344,7 @@ const IndicatorManager: React.FC<Props> = ({ indicators, onChange }) => {
         <div className="space-y-4">
           <p className="text-slate-600 dark:text-slate-300">
             确定要删除指标 <span className="font-bold text-red-600 dark:text-red-400">“{indicators.find(i => i.id === deleteId)?.name}”</span> 吗？
-            <br/>
+            <br />
             <span className="text-sm opacity-80">将会同时删除所有货物中对应的该项指标数据。</span>
           </p>
           <div className="flex gap-3 justify-end">
@@ -365,7 +363,7 @@ const IndicatorManager: React.FC<Props> = ({ indicators, onChange }) => {
           </div>
         </div>
       </Modal>
-      
+
       {/* Batch Delete Confirmation Modal */}
       <Modal
         isOpen={showBatchDeleteConfirm}
@@ -374,7 +372,7 @@ const IndicatorManager: React.FC<Props> = ({ indicators, onChange }) => {
       >
         <div className="space-y-4">
           <p className="text-slate-600 dark:text-slate-300">
-            确定要删除选中的 <span className="font-bold text-red-600 dark:text-red-400">{selectedIds.size}</span> 个指标吗？<br/>
+            确定要删除选中的 <span className="font-bold text-red-600 dark:text-red-400">{selectedIds.size}</span> 个指标吗？<br />
             这将同时删除所有货物中对应的该项指标数据。
           </p>
           <div className="flex gap-3 justify-end">

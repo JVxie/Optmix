@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Indicator, Material, OptimizationResult } from '../types';
-import { calculateOptimalMix } from '../services/solver';
+import { Indicator, Material, OptimizationResult } from '@/types';
+import { calculateOptimalMix } from '@/services/solver';
 import { AlertTriangle, Calculator, Check, RefreshCw, ArrowRight, TrendingUp, JapaneseYen, Layers, Sliders, Loader2 } from 'lucide-react';
-import Modal from './Modal';
+import Modal from '@/components/common/Modal';
 
 interface Props {
   materials: Material[];

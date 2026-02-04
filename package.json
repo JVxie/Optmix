@@ -14,6 +14,10 @@
     "electron:dev": "concurrently -k \"npm run dev\" \"wait-on http://localhost:3000 && cross-env NODE_ENV=development electron .\"",
     "electron:build": "npm run build && electron-builder --config",
     "electron:build:win": "npm run build && electron-builder --win --x64 --config",
+    "electron:build:mac": "npm run build && electron-builder --mac --config",
+    "electron:build:mac:arm64": "npm run build && electron-builder --mac --arm64 --config",
+    "electron:build:mac:x64": "npm run build && electron-builder --mac --x64 --config",
+    "electron:build:mac:universal": "npm run build && electron-builder --mac --universal --config",
     "electron:build:dir": "npm run build && electron-builder --dir --config",
     "android:sync": "npm run build && npx cap sync android",
     "android:open": "npx cap open android",
@@ -94,6 +98,50 @@
       "shortcutName": "OptiMix",
       "deleteAppDataOnUninstall": false,
       "license": false
+    },
+    "mac": {
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "icon": "public/icons/mac/icon.icns",
+      "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+      "category": "public.app-category.productivity",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist"
+    },
+    "dmg": {
+      "sign": false,
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ],
+      "window": {
+        "width": 540,
+        "height": 380
+      }
     }
   }
 }

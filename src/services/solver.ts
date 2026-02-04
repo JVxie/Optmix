@@ -1,5 +1,5 @@
 
-import { Indicator, Material, OptimizationResult } from '../types';
+import { Indicator, Material, OptimizationResult } from '@/types';
 // Use the library from importmap
 import solver from 'javascript-lp-solver';
 

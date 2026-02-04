@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Indicator, Material } from '../types';
+import { Indicator, Material } from '@/types';
 import { AlertTriangle, Check } from 'lucide-react';
 
 interface Props {

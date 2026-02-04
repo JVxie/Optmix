@@ -1,5 +1,5 @@
 import * as XLSX from 'xlsx';
-import { Indicator, Material, Scenario } from '../types';
+import { Indicator, Material, Scenario } from '@/types';
 import { Capacitor } from '@capacitor/core';
 import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { Share } from '@capacitor/share';
@@ -32,7 +32,7 @@ export const exportScenarioToExcel = async (scenario: Scenario): Promise<void> =
     "最小值": ind.min,
     "最大值": ind.max
   }));
-  
+
   const indicatorHeaders = ["名称", "单位", "最小值", "最大值"];
   const wsIndicators = XLSX.utils.json_to_sheet(indicatorData, { header: indicatorHeaders });
   XLSX.utils.book_append_sheet(wb, wsIndicators, "指标管理");
@@ -56,7 +56,7 @@ export const exportScenarioToExcel = async (scenario: Scenario): Promise<void> =
 
   // Generate Filename
   const filename = `导出${scenario.name}-${getFormattedDate()}.xlsx`;
-  
+
   // 判断平台
   if (Capacitor.isNativePlatform()) {
     // 📱 移动端：保存到缓存后通过分享导出
@@ -64,7 +64,7 @@ export const exportScenarioToExcel = async (scenario: Scenario): Promise<void> =
       // 生成 Excel 二进制数据
       const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
       const base64Data = arrayBufferToBase64(excelBuffer);
-      
+
       // 保存到缓存目录
       const fileResult = await Filesystem.writeFile({
         path: filename,
@@ -78,7 +78,7 @@ export const exportScenarioToExcel = async (scenario: Scenario): Promise<void> =
         url: fileResult.uri,
         dialogTitle: '选择保存或分享方式'
       });
-      
+
     } catch (error) {
       console.error('导出失败:', error);
       throw new Error('导出文件失败，请重试');
@@ -92,7 +92,7 @@ export const exportScenarioToExcel = async (scenario: Scenario): Promise<void> =
 export const parseScenarioFromExcel = async (file: File): Promise<Scenario> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    
+
     reader.onload = (e) => {
       try {
         const data = e.target?.result;
@@ -107,7 +107,7 @@ export const parseScenarioFromExcel = async (file: File): Promise<Scenario> => {
         // 1. Parse Indicators
         const indicatorSheet = workbook.Sheets["指标管理"];
         const rawIndicators = XLSX.utils.sheet_to_json<Record<string, unknown>>(indicatorSheet);
-        
+
         const indicators: Indicator[] = [];
         const indicatorNameMap = new Map<string, string>();
         const indicatorNames = new Set<string>();
@@ -130,7 +130,7 @@ export const parseScenarioFromExcel = async (file: File): Promise<Scenario> => {
           };
 
           if (isNaN(ind.min) || isNaN(ind.max)) {
-             throw new Error(`指标"${ind.name}"的数值无效。`);
+            throw new Error(`指标"${ind.name}"的数值无效。`);
           }
 
           indicators.push(ind);
@@ -145,41 +145,41 @@ export const parseScenarioFromExcel = async (file: File): Promise<Scenario> => {
         const materialNames = new Set<string>();
 
         rawMaterials.forEach((row, index) => {
-           if (!row["名称"] || row["单价"] === undefined) {
-             throw new Error(`货物管理第 ${index + 2} 行数据缺失（名称、单价为必填）。`);
-           }
-           if (materialNames.has(String(row["名称"]))) {
-             throw new Error(`货物名称重复：${row["名称"]}`);
-           }
+          if (!row["名称"] || row["单价"] === undefined) {
+            throw new Error(`货物管理第 ${index + 2} 行数据缺失（名称、单价为必填）。`);
+          }
+          if (materialNames.has(String(row["名称"]))) {
+            throw new Error(`货物名称重复：${row["名称"]}`);
+          }
 
-           const matId = `mat_${Date.now()}_${index}`;
-           const price = Number(row["单价"]);
-           
-           if (isNaN(price)) {
-             throw new Error(`货物"${row["名称"]}"的单价无效。`);
-           }
+          const matId = `mat_${Date.now()}_${index}`;
+          const price = Number(row["单价"]);
 
-           const indicatorValues: Record<string, number> = {};
-           
-           indicators.forEach(ind => {
-             const val = row[ind.name];
-             if (val === undefined || val === null || String(val).trim() === '') {
-                throw new Error(`货物"${row["名称"]}"缺失指标"${ind.name}"的数值。`);
-             }
-             const numVal = Number(val);
-             if (isNaN(numVal)) {
-               throw new Error(`货物"${row["名称"]}"的指标"${ind.name}"数值无效。`);
-             }
-             indicatorValues[ind.id] = numVal;
-           });
+          if (isNaN(price)) {
+            throw new Error(`货物"${row["名称"]}"的单价无效。`);
+          }
 
-           materials.push({
-             id: matId,
-             name: String(row["名称"]).trim(),
-             price,
-             indicatorValues
-           });
-           materialNames.add(String(row["名称"]).trim());
+          const indicatorValues: Record<string, number> = {};
+
+          indicators.forEach(ind => {
+            const val = row[ind.name];
+            if (val === undefined || val === null || String(val).trim() === '') {
+              throw new Error(`货物"${row["名称"]}"缺失指标"${ind.name}"的数值。`);
+            }
+            const numVal = Number(val);
+            if (isNaN(numVal)) {
+              throw new Error(`货物"${row["名称"]}"的指标"${ind.name}"数值无效。`);
+            }
+            indicatorValues[ind.id] = numVal;
+          });
+
+          materials.push({
+            id: matId,
+            name: String(row["名称"]).trim(),
+            price,
+            indicatorValues
+          });
+          materialNames.add(String(row["名称"]).trim());
         });
 
         resolve({

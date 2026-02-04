@@ -7,12 +7,25 @@ const isDev = process.env.NODE_ENV === 'development';
 let mainWindow = null;  // ← 使用 let 而不是 const
 
 function createWindow() {
+  // 根据平台选择图标
+  let iconPath;
+  if (process.platform === 'darwin') {
+    iconPath = isDev
+      ? path.join(__dirname, '../public/icons/mac/icon.icns')
+      : path.join(__dirname, '../dist/icons/mac/icon.icns');
+  } else {
+    iconPath = isDev
+      ? path.join(__dirname, '../public/icons/win/icon.ico')
+      : path.join(__dirname, '../dist/icons/win/icon.ico');
+  }
+
   // 创建浏览器窗口
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 800,
     minWidth: 800,
     minHeight: 600,
+    icon: iconPath,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,

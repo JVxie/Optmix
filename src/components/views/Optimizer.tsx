@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
-import { Indicator, Material, OptimizationResult } from '../types';
-import { calculateOptimalMix } from '../services/solver';
+import { Indicator, Material, OptimizationResult } from '@/types';
+import { calculateOptimalMix } from '@/services/solver';
 import { Calculator, CheckCircle, XCircle, RefreshCw } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 
@@ -136,8 +136,8 @@ const Optimizer: React.FC<Props> = ({ materials, indicators }) => {
                 <div
                   key={ind.id}
                   className={`p-3 rounded-lg border-2 transition-colors ${isOk
-                      ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
-                      : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+                    ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+                    : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
                     }`}
                 >
                   {/* 指标名称 */}
@@ -158,8 +158,8 @@ const Optimizer: React.FC<Props> = ({ materials, indicators }) => {
 
                   {/* 差值 */}
                   <div className={`text-xs font-medium mt-1 ${isOk
-                      ? 'text-green-600 dark:text-green-400'
-                      : 'text-red-500 dark:text-red-400'
+                    ? 'text-green-600 dark:text-green-400'
+                    : 'text-red-500 dark:text-red-400'
                     }`}>
                     {diffLabel}
                   </div>

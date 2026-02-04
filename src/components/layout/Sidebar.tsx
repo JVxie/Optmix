@@ -1,8 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { Plus, Trash2, Edit2, Check, X, ChevronLeft, AlertCircle, FileSpreadsheet, Download, Upload, ListChecks } from 'lucide-react';
-import { Scenario } from '../types';
-import Modal from './Modal';
-import { exportScenarioToExcel, parseScenarioFromExcel } from '../services/excelService';
+import { Scenario } from '@/types';
+import Modal from '@/components/common/Modal';
+import { exportScenarioToExcel, parseScenarioFromExcel } from '@/services/excelService';
 
 interface SidebarProps {
   scenarios: Scenario[];
@@ -33,20 +33,20 @@ const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
-  
+
   // Batch Mode State
   const [isBatchMode, setIsBatchMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  
+
   // States for custom modals
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [showBatchDeleteConfirm, setShowBatchDeleteConfirm] = useState(false);
   const [alertMsg, setAlertMsg] = useState<string | null>(null);
   const [isIOModalOpen, setIsIOModalOpen] = useState(false);
-  
+
   // 新增：导出中状态
   const [isExporting, setIsExporting] = useState(false);
-  
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleStartEdit = (s: Scenario) => {
@@ -112,9 +112,9 @@ const Sidebar: React.FC<SidebarProps> = ({
   const handleExport = async () => {
     const activeScenario = scenarios.find(s => s.id === activeScenarioId);
     if (!activeScenario) return;
-    
+
     setIsExporting(true);
-    
+
     try {
       await exportScenarioToExcel(activeScenario);
       setIsIOModalOpen(false);
@@ -156,7 +156,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     <>
       {/* Mobile Overlay */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-20 md:hidden"
           onClick={() => setIsOpen(false)}
         />
@@ -170,7 +170,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         md:relative md:translate-x-0 flex flex-col
       `}>
         {/* ✅ 修改：侧边栏头部添加状态栏高度 padding */}
-        <div 
+        <div
           className="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between bg-slate-50 dark:bg-slate-900"
           style={{ paddingTop: `calc(1rem + ${statusBarHeight}px)` }}
         >
@@ -178,22 +178,22 @@ const Sidebar: React.FC<SidebarProps> = ({
             <h2 className="font-bold text-lg text-slate-800 dark:text-slate-100">方案管理</h2>
           </div>
           <div className="flex items-center gap-1">
-             <button
-               onClick={() => {
-                 setIsBatchMode(!isBatchMode);
-                 setSelectedIds(new Set());
-               }}
-               className={`p-1.5 rounded-lg transition-colors ${isBatchMode ? 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'}`}
-               title={isBatchMode ? "退出批量管理" : "批量管理"}
-             >
-               <ListChecks size={20} />
-             </button>
-             <button 
-                onClick={() => setIsOpen(false)}
-                className="md:hidden text-slate-500 dark:text-slate-400 p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg"
-              >
-                <ChevronLeft size={20} />
-             </button>
+            <button
+              onClick={() => {
+                setIsBatchMode(!isBatchMode);
+                setSelectedIds(new Set());
+              }}
+              className={`p-1.5 rounded-lg transition-colors ${isBatchMode ? 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'}`}
+              title={isBatchMode ? "退出批量管理" : "批量管理"}
+            >
+              <ListChecks size={20} />
+            </button>
+            <button
+              onClick={() => setIsOpen(false)}
+              className="md:hidden text-slate-500 dark:text-slate-400 p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg"
+            >
+              <ChevronLeft size={20} />
+            </button>
           </div>
         </div>
 
@@ -212,25 +212,24 @@ const Sidebar: React.FC<SidebarProps> = ({
               className={`
                 group min-h-[52px] flex items-center p-2 rounded-lg cursor-pointer transition-colors
                 ${activeScenarioId === scenario.id && !isBatchMode
-                  ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 shadow-sm ring-1 ring-blue-200 dark:ring-blue-800' 
+                  ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 shadow-sm ring-1 ring-blue-200 dark:ring-blue-800'
                   : 'hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-transparent'}
               `}
             >
               {isBatchMode && (
                 <div className="mr-3 flex items-center">
-                  <div 
+                  <div
                     onClick={(e) => { e.stopPropagation(); toggleSelection(scenario.id); }}
-                    className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all duration-200 ${
-                      selectedIds.has(scenario.id)
-                      ? 'bg-blue-600 border-blue-600 dark:bg-blue-500 dark:border-blue-500'
-                      : 'bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-500 hover:border-blue-400 dark:hover:border-blue-400'
-                    }`}
+                    className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all duration-200 ${selectedIds.has(scenario.id)
+                        ? 'bg-blue-600 border-blue-600 dark:bg-blue-500 dark:border-blue-500'
+                        : 'bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-500 hover:border-blue-400 dark:hover:border-blue-400'
+                      }`}
                   >
                     <Check size={12} className={`text-white transform transition-transform duration-200 ${selectedIds.has(scenario.id) ? 'scale-100' : 'scale-0'}`} strokeWidth={3} />
                   </div>
                 </div>
               )}
-              
+
               <div className="flex-1 min-w-0 flex items-center justify-between">
                 {editingId === scenario.id ? (
                   <div className="flex items-center w-full gap-2" onClick={(e) => e.stopPropagation()}>
@@ -282,25 +281,25 @@ const Sidebar: React.FC<SidebarProps> = ({
 
         <div className="p-4 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 space-y-3">
           {isBatchMode ? (
-             <div className="flex flex-col gap-3">
-               <button
-                  onClick={handleBatchDeleteClick}
-                  disabled={selectedIds.size === 0}
-                  className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-2.5 px-4 rounded-lg transition-colors font-medium text-sm shadow-sm"
-               >
-                  <Trash2 size={16} />
-                  删除选中 ({selectedIds.size})
-               </button>
-               <button
-                 onClick={() => {
-                   setIsBatchMode(false);
-                   setSelectedIds(new Set());
-                 }}
-                 className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 py-2.5 px-4 rounded-lg transition-colors font-medium text-sm"
-               >
-                 取消
-               </button>
-             </div>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={handleBatchDeleteClick}
+                disabled={selectedIds.size === 0}
+                className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-2.5 px-4 rounded-lg transition-colors font-medium text-sm shadow-sm"
+              >
+                <Trash2 size={16} />
+                删除选中 ({selectedIds.size})
+              </button>
+              <button
+                onClick={() => {
+                  setIsBatchMode(false);
+                  setSelectedIds(new Set());
+                }}
+                className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 py-2.5 px-4 rounded-lg transition-colors font-medium text-sm"
+              >
+                取消
+              </button>
+            </div>
           ) : (
             <>
               <button
@@ -310,7 +309,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <Plus size={16} />
                 新建方案
               </button>
-              
+
               <button
                 onClick={() => setIsIOModalOpen(true)}
                 className="w-full flex items-center justify-center gap-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 py-2.5 px-4 rounded-lg transition-colors font-medium text-sm"
@@ -331,16 +330,16 @@ const Sidebar: React.FC<SidebarProps> = ({
       >
         <div className="space-y-6">
           <div className="space-y-3 text-sm text-slate-600 dark:text-slate-300">
-             <h4 className="font-bold text-slate-800 dark:text-slate-100">使用说明：</h4>
-             <div className="pl-2 space-y-2.5">
-                <p>1. <span className="font-medium text-slate-800 dark:text-slate-200">导出模板</span>：点击"导出方案"，将选择的方案数据保存为 Excel 文件。强烈建议以此文件作为编辑模板。</p>
-                <p>2. <span className="font-medium text-slate-800 dark:text-slate-200">编辑数据</span>：在 Excel 中编辑。您可以调整数值，或严格按照原有格式新增指标列与货物行。</p>
-                <p>3. <span className="font-medium text-slate-800 dark:text-slate-200">导入方案</span>：将编辑好的文件上传，系统将自动识别并生成一个新的方案副本。</p>
-             </div>
+            <h4 className="font-bold text-slate-800 dark:text-slate-100">使用说明：</h4>
+            <div className="pl-2 space-y-2.5">
+              <p>1. <span className="font-medium text-slate-800 dark:text-slate-200">导出模板</span>：点击"导出方案"，将选择的方案数据保存为 Excel 文件。强烈建议以此文件作为编辑模板。</p>
+              <p>2. <span className="font-medium text-slate-800 dark:text-slate-200">编辑数据</span>：在 Excel 中编辑。您可以调整数值，或严格按照原有格式新增指标列与货物行。</p>
+              <p>3. <span className="font-medium text-slate-800 dark:text-slate-200">导入方案</span>：将编辑好的文件上传，系统将自动识别并生成一个新的方案副本。</p>
+            </div>
           </div>
 
           <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-100 dark:border-blue-800 text-sm text-blue-800 dark:text-blue-300 space-y-2">
-            <h4 className="font-bold flex items-center gap-2"><AlertCircle size={16}/> 数据规范与注意事项</h4>
+            <h4 className="font-bold flex items-center gap-2"><AlertCircle size={16} /> 数据规范与注意事项</h4>
             <ul className="list-disc pl-5 space-y-1.5 text-blue-700/80 dark:text-blue-300/80">
               <li><strong>模板规范：</strong>强烈建议先执行"导出"操作获取标准模板，在此基础上进行数据编辑。</li>
               <li><strong>表头锁定：</strong>请勿修改 Excel 第一行的表头名称（指标名称、货物名称等），否则无法识别。</li>
@@ -351,7 +350,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <button 
+            <button
               onClick={handleExport}
               disabled={isExporting}
               className="flex flex-col items-center justify-center gap-3 p-6 border-2 border-slate-100 dark:border-slate-700 rounded-xl hover:border-emerald-500 dark:hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
@@ -368,7 +367,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               </span>
             </button>
 
-            <button 
+            <button
               onClick={handleImportClick}
               className="flex flex-col items-center justify-center gap-3 p-6 border-2 border-slate-100 dark:border-slate-700 rounded-xl hover:border-blue-500 dark:hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all group"
             >
@@ -378,9 +377,9 @@ const Sidebar: React.FC<SidebarProps> = ({
               <span className="font-bold text-slate-700 dark:text-slate-300 group-hover:text-blue-700 dark:group-hover:text-blue-400">导入方案</span>
             </button>
           </div>
-          
-          <input 
-            type="file" 
+
+          <input
+            type="file"
             ref={fileInputRef}
             className="hidden"
             accept=".xlsx, .xls"
@@ -398,7 +397,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         <div className="space-y-4">
           <p className="text-slate-600 dark:text-slate-300">
             确定要删除方案 <span className="font-bold text-red-600 dark:text-red-400">“{scenarios.find(s => s.id === deleteId)?.name}”</span> 吗？
-            <br/>
+            <br />
             <span className="text-sm opacity-80">此操作无法撤销。</span>
           </p>
           <div className="flex gap-3 justify-end">
@@ -417,7 +416,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           </div>
         </div>
       </Modal>
-      
+
       {/* Batch Delete Confirmation Modal */}
       <Modal
         isOpen={showBatchDeleteConfirm}
@@ -426,7 +425,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       >
         <div className="space-y-4">
           <p className="text-slate-600 dark:text-slate-300">
-            确定要删除选中的 <span className="font-bold text-red-600 dark:text-red-400">{selectedIds.size}</span> 个方案吗？<br/>
+            确定要删除选中的 <span className="font-bold text-red-600 dark:text-red-400">{selectedIds.size}</span> 个方案吗？<br />
             <span className="text-sm opacity-80">注意：若所有方案被删除，系统将自动创建一个默认新方案。</span>
           </p>
           <div className="flex gap-3 justify-end">

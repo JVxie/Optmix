@@ -3,10 +3,10 @@ import { Menu, Settings, Activity, Box, Sun, Moon, Monitor, ChevronDown } from '
 import { Capacitor } from '@capacitor/core';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { SafeArea } from 'capacitor-plugin-safe-area';
-import Sidebar from './components/Sidebar';
-import ConfigurationView from './components/ConfigurationView';
-import CalculationView from './components/CalculationView';
-import { Scenario, ViewMode, OptimizationResult } from './types';
+import Sidebar from '@/components/layout/Sidebar';
+import ConfigurationView from '@/components/views/ConfigurationView';
+import CalculationView from '@/components/views/CalculationView';
+import { Scenario, ViewMode, OptimizationResult } from '@/types';
 
 // Default initial data
 const INITIAL_SCENARIOS: Scenario[] = [
