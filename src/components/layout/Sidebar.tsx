@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Plus, Trash2, Edit2, Check, X, ChevronLeft, AlertCircle, FileSpreadsheet, Download, Upload, ListChecks } from 'lucide-react';
 import { Scenario } from '@/types';
 import Modal from '@/components/common/Modal';
+import { useToast } from '@/contexts/ToastContext';
 import { exportScenarioToExcel, parseScenarioFromExcel } from '@/services/excelService';
 
 interface SidebarProps {
@@ -44,6 +45,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [alertMsg, setAlertMsg] = useState<string | null>(null);
   const [isIOModalOpen, setIsIOModalOpen] = useState(false);
 
+  const { showToast } = useToast();
+
   // 新增：导出中状态
   const [isExporting, setIsExporting] = useState(false);
 
@@ -76,7 +79,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const handleDeleteClick = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
     if (scenarios.length <= 1) {
-      setAlertMsg("必须至少保留一个方案");
+      showToast("必须至少保留一个方案", "error");
       return;
     }
     setDeleteId(id);
@@ -221,8 +224,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                   <div
                     onClick={(e) => { e.stopPropagation(); toggleSelection(scenario.id); }}
                     className={`w-5 h-5 rounded-md border flex items-center justify-center transition-all duration-200 ${selectedIds.has(scenario.id)
-                        ? 'bg-blue-600 border-blue-600 dark:bg-blue-500 dark:border-blue-500'
-                        : 'bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-500 hover:border-blue-400 dark:hover:border-blue-400'
+                      ? 'bg-blue-600 border-blue-600 dark:bg-blue-500 dark:border-blue-500'
+                      : 'bg-white dark:bg-slate-700 border-slate-300 dark:border-slate-500 hover:border-blue-400 dark:hover:border-blue-400'
                       }`}
                   >
                     <Check size={12} className={`text-white transform transition-transform duration-200 ${selectedIds.has(scenario.id) ? 'scale-100' : 'scale-0'}`} strokeWidth={3} />
