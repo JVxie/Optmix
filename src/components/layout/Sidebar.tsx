@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Plus, Trash2, Edit2, Check, X, ChevronLeft, AlertCircle, FileSpreadsheet, Download, Upload, ListChecks } from 'lucide-react';
 import { Scenario } from '@/types';
 import Modal from '@/components/common/Modal';
@@ -16,7 +17,7 @@ interface SidebarProps {
   onRename: (id: string, newName: string) => void;
   isOpen: boolean;
   setIsOpen: (v: boolean) => void;
-  statusBarHeight?: number; // ✅ 新增：接收状态栏高度
+  statusBarHeight?: number;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -30,8 +31,9 @@ const Sidebar: React.FC<SidebarProps> = ({
   onRename,
   isOpen,
   setIsOpen,
-  statusBarHeight = 0 // ✅ 默认值为 0
+  statusBarHeight = 0
 }) => {
+  const { t } = useTranslation();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
 
@@ -47,7 +49,6 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const { showToast } = useToast();
 
-  // 新增：导出中状态
   const [isExporting, setIsExporting] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -65,21 +66,21 @@ const Sidebar: React.FC<SidebarProps> = ({
       );
 
       if (isDuplicate) {
-        setAlertMsg(`方案名称 "${trimmedName}" 已存在，请更换名称。`);
+        setAlertMsg(t('scenario.duplicateName', { name: trimmedName }));
         return;
       }
 
       onRename(editingId, trimmedName);
       setEditingId(null);
     } else {
-      setAlertMsg("请输入方案名称。");
+      setAlertMsg(t('scenario.nameRequired'));
     }
   };
 
   const handleDeleteClick = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
     if (scenarios.length <= 1) {
-      showToast("必须至少保留一个方案", "error");
+      showToast(t('scenario.mustKeepOne'), "error");
       return;
     }
     setDeleteId(id);
@@ -122,11 +123,11 @@ const Sidebar: React.FC<SidebarProps> = ({
       await exportScenarioToExcel(activeScenario);
       setIsIOModalOpen(false);
       if (!window.Capacitor?.isNativePlatform()) {
-        setAlertMsg(`方案 "${activeScenario.name}" 导出成功！`);
+        setAlertMsg(t('scenario.exportSuccess', { name: activeScenario.name }));
       }
     } catch (e) {
       console.error(e);
-      setAlertMsg(e instanceof Error ? e.message : "导出失败，请重试。");
+      setAlertMsg(e instanceof Error ? e.message : t('scenario.exportFailed'));
     } finally {
       setIsExporting(false);
     }
@@ -146,10 +147,10 @@ const Sidebar: React.FC<SidebarProps> = ({
       const scenario = await parseScenarioFromExcel(file);
       onImport(scenario);
       setIsIOModalOpen(false);
-      setAlertMsg("方案导入成功！");
+      setAlertMsg(t('scenario.importSuccess'));
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
-      setAlertMsg(`导入失败: ${message}`);
+      setAlertMsg(t('scenario.importFailed', { message }));
     } finally {
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
@@ -172,13 +173,12 @@ const Sidebar: React.FC<SidebarProps> = ({
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         md:relative md:translate-x-0 flex flex-col
       `}>
-        {/* ✅ 修改：侧边栏头部添加状态栏高度 padding */}
         <div
           className="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between bg-slate-50 dark:bg-slate-900"
           style={{ paddingTop: `calc(1rem + ${statusBarHeight}px)` }}
         >
           <div className="flex items-center gap-2">
-            <h2 className="font-bold text-lg text-slate-800 dark:text-slate-100">方案管理</h2>
+            <h2 className="font-bold text-lg text-slate-800 dark:text-slate-100">{t('scenario.title')}</h2>
           </div>
           <div className="flex items-center gap-1">
             <button
@@ -187,7 +187,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 setSelectedIds(new Set());
               }}
               className={`p-1.5 rounded-lg transition-colors ${isBatchMode ? 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400' : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700'}`}
-              title={isBatchMode ? "退出批量管理" : "批量管理"}
+              title={isBatchMode ? t('scenario.exitBatch') : t('scenario.batchManage')}
             >
               <ListChecks size={20} />
             </button>
@@ -291,7 +291,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white py-2.5 px-4 rounded-lg transition-colors font-medium text-sm shadow-sm"
               >
                 <Trash2 size={16} />
-                删除选中 ({selectedIds.size})
+                {t('scenario.deleteSelected')} ({selectedIds.size})
               </button>
               <button
                 onClick={() => {
@@ -300,7 +300,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 }}
                 className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 py-2.5 px-4 rounded-lg transition-colors font-medium text-sm"
               >
-                取消
+                {t('common.cancel')}
               </button>
             </div>
           ) : (
@@ -310,7 +310,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 className="w-full flex items-center justify-center gap-2 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600 text-white py-2.5 px-4 rounded-lg transition-colors font-medium text-sm"
               >
                 <Plus size={16} />
-                新建方案
+                {t('scenario.newScenario')}
               </button>
 
               <button
@@ -318,7 +318,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 className="w-full flex items-center justify-center gap-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 py-2.5 px-4 rounded-lg transition-colors font-medium text-sm"
               >
                 <FileSpreadsheet size={16} className="text-emerald-600 dark:text-emerald-500" />
-                导入 / 导出
+                {t('scenario.importExport')}
               </button>
             </>
           )}
@@ -329,26 +329,26 @@ const Sidebar: React.FC<SidebarProps> = ({
       <Modal
         isOpen={isIOModalOpen}
         onClose={() => setIsIOModalOpen(false)}
-        title="导入 / 导出方案"
+        title={t('scenario.importExportTitle')}
       >
         <div className="space-y-6">
           <div className="space-y-3 text-sm text-slate-600 dark:text-slate-300">
-            <h4 className="font-bold text-slate-800 dark:text-slate-100">使用说明：</h4>
+            <h4 className="font-bold text-slate-800 dark:text-slate-100">{t('scenario.usageGuide')}</h4>
             <div className="pl-2 space-y-2.5">
-              <p>1. <span className="font-medium text-slate-800 dark:text-slate-200">导出模板</span>：点击"导出方案"，将选择的方案数据保存为 Excel 文件。强烈建议以此文件作为编辑模板。</p>
-              <p>2. <span className="font-medium text-slate-800 dark:text-slate-200">编辑数据</span>：在 Excel 中编辑。您可以调整数值，或严格按照原有格式新增指标列与货物行。</p>
-              <p>3. <span className="font-medium text-slate-800 dark:text-slate-200">导入方案</span>：将编辑好的文件上传，系统将自动识别并生成一个新的方案副本。</p>
+              <p>1. <span className="font-medium text-slate-800 dark:text-slate-200">{t('scenario.step1Title')}</span>{t('scenario.step1Desc')}</p>
+              <p>2. <span className="font-medium text-slate-800 dark:text-slate-200">{t('scenario.step2Title')}</span>{t('scenario.step2Desc')}</p>
+              <p>3. <span className="font-medium text-slate-800 dark:text-slate-200">{t('scenario.step3Title')}</span>{t('scenario.step3Desc')}</p>
             </div>
           </div>
 
           <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-100 dark:border-blue-800 text-sm text-blue-800 dark:text-blue-300 space-y-2">
-            <h4 className="font-bold flex items-center gap-2"><AlertCircle size={16} /> 数据规范与注意事项</h4>
+            <h4 className="font-bold flex items-center gap-2"><AlertCircle size={16} /> {t('scenario.dataSpec')}</h4>
             <ul className="list-disc pl-5 space-y-1.5 text-blue-700/80 dark:text-blue-300/80">
-              <li><strong>模板规范：</strong>强烈建议先执行"导出"操作获取标准模板，在此基础上进行数据编辑。</li>
-              <li><strong>表头锁定：</strong>请勿修改 Excel 第一行的表头名称（指标名称、货物名称等），否则无法识别。</li>
-              <li><strong>工作表完整性：</strong>必须包含"指标管理"和"货物管理"两个工作表，且名称不可更改。</li>
-              <li><strong>数据格式：</strong>数值单元格仅支持数字，请勿添加货币符号或文本备注；空白单元格可能导致错误。</li>
-              <li><strong>方案独立性：</strong>导入操作将生成一个新的方案副本，不会覆盖您当前已有的任何方案。</li>
+              <li>{t('scenario.spec1')}</li>
+              <li>{t('scenario.spec2')}</li>
+              <li>{t('scenario.spec3')}</li>
+              <li>{t('scenario.spec4')}</li>
+              <li>{t('scenario.spec5')}</li>
             </ul>
           </div>
 
@@ -366,7 +366,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 )}
               </div>
               <span className="font-bold text-slate-700 dark:text-slate-300 group-hover:text-emerald-700 dark:group-hover:text-emerald-400">
-                {isExporting ? '导出中...' : '导出方案'}
+                {isExporting ? t('scenario.exporting') : t('scenario.exportScenario')}
               </span>
             </button>
 
@@ -377,7 +377,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform">
                 <Download size={24} />
               </div>
-              <span className="font-bold text-slate-700 dark:text-slate-300 group-hover:text-blue-700 dark:group-hover:text-blue-400">导入方案</span>
+              <span className="font-bold text-slate-700 dark:text-slate-300 group-hover:text-blue-700 dark:group-hover:text-blue-400">{t('scenario.importScenario')}</span>
             </button>
           </div>
 
@@ -395,26 +395,26 @@ const Sidebar: React.FC<SidebarProps> = ({
       <Modal
         isOpen={!!deleteId}
         onClose={() => setDeleteId(null)}
-        title="删除方案确认"
+        title={t('scenario.deleteTitle')}
       >
         <div className="space-y-4">
           <p className="text-slate-600 dark:text-slate-300">
-            确定要删除方案 <span className="font-bold text-red-600 dark:text-red-400">“{scenarios.find(s => s.id === deleteId)?.name}”</span> 吗？
+            {t('scenario.deleteConfirm')} <span className="font-bold text-red-600 dark:text-red-400">&ldquo;{scenarios.find(s => s.id === deleteId)?.name}&rdquo;</span>
             <br />
-            <span className="text-sm opacity-80">此操作无法撤销。</span>
+            <span className="text-sm opacity-80">{t('scenario.deleteIrreversible')}</span>
           </p>
           <div className="flex gap-3 justify-end">
             <button
               onClick={() => setDeleteId(null)}
               className="px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg text-sm font-medium transition-colors"
             >
-              取消
+              {t('common.cancel')}
             </button>
             <button
               onClick={confirmDelete}
               className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors"
             >
-              确认删除
+              {t('common.confirmDelete')}
             </button>
           </div>
         </div>
@@ -424,25 +424,25 @@ const Sidebar: React.FC<SidebarProps> = ({
       <Modal
         isOpen={showBatchDeleteConfirm}
         onClose={() => setShowBatchDeleteConfirm(false)}
-        title="批量删除确认"
+        title={t('scenario.batchDeleteTitle')}
       >
         <div className="space-y-4">
           <p className="text-slate-600 dark:text-slate-300">
-            确定要删除选中的 <span className="font-bold text-red-600 dark:text-red-400">{selectedIds.size}</span> 个方案吗？<br />
-            <span className="text-sm opacity-80">注意：若所有方案被删除，系统将自动创建一个默认新方案。</span>
+            {t('scenario.batchDeleteConfirm')} <span className="font-bold text-red-600 dark:text-red-400">{selectedIds.size}</span> {t('scenario.batchDeleteUnit')}<br />
+            <span className="text-sm opacity-80">{t('scenario.batchDeleteHint')}</span>
           </p>
           <div className="flex gap-3 justify-end">
             <button
               onClick={() => setShowBatchDeleteConfirm(false)}
               className="px-4 py-2 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg text-sm font-medium transition-colors"
             >
-              取消
+              {t('common.cancel')}
             </button>
             <button
               onClick={confirmBatchDelete}
               className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition-colors"
             >
-              确认删除
+              {t('common.confirmDelete')}
             </button>
           </div>
         </div>
@@ -452,7 +452,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       <Modal
         isOpen={!!alertMsg}
         onClose={() => setAlertMsg(null)}
-        title="提示"
+        title={t('common.hint')}
       >
         <div className="space-y-4">
           <div className="flex items-center gap-3 text-slate-700 dark:text-slate-300 bg-slate-50 dark:bg-slate-700/50 p-4 rounded-lg border border-slate-100 dark:border-slate-600">
@@ -464,7 +464,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               onClick={() => setAlertMsg(null)}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors"
             >
-              知道了
+              {t('common.ok')}
             </button>
           </div>
         </div>

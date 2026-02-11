@@ -1,7 +1,7 @@
 {
   "name": "optimix-raw-material-calculator",
   "private": true,
-  "version": "2.1.1",
+  "version": "2.2.0",
   "type": "module",
   "main": "electron/main.cjs",
   "author": "JVxie <i@jvxie.com>",
@@ -32,10 +32,12 @@
     "@capacitor/share": "^8.0.0",
     "@capacitor/status-bar": "^8.0.0",
     "capacitor-plugin-safe-area": "^5.0.0",
+    "i18next": "^25.8.4",
     "javascript-lp-solver": "^1.0.3",
     "lucide-react": "^0.563.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "react-i18next": "^16.5.4",
     "recharts": "^3.7.0",
     "xlsx": "^0.18.5"
   },
@@ -162,7 +164,8 @@
         }
       ],
       "icon": "public/icons/png/512x512.png",
-      "category": "Utility"
+      "category": "Utility",
+      "artifactName": "${productName}-${version}-${arch}.${ext}"
     }
   }
 }

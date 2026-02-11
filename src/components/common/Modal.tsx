@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useLayoutEffect } from 'react';
 import ReactDOM from 'react-dom';
-import { X } from 'lucide-react';
 
 interface ModalProps {
   isOpen: boolean;
@@ -111,14 +110,8 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
             : 'opacity-0 scale-95 translate-y-4'}
         `}
       >
-        <div className="flex items-center justify-between p-4 border-b border-slate-100 dark:border-slate-700 shrink-0">
+        <div className="flex items-center p-4 border-b border-slate-100 dark:border-slate-700 shrink-0">
           <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100">{title}</h3>
-          <button 
-            onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 p-2 rounded-lg transition-colors"
-          >
-            <X size={20} />
-          </button>
         </div>
         <div className="p-6 overflow-y-auto text-slate-700 dark:text-slate-300">
           {children}

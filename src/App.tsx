@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, Settings, Activity, Box, Sun, Moon, Monitor, ChevronDown } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { ClipboardList, Activity, Box, Settings } from 'lucide-react';
 import { Capacitor } from '@capacitor/core';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { SafeArea } from 'capacitor-plugin-safe-area';
 import Sidebar from '@/components/layout/Sidebar';
+import BottomTabBar, { TabType } from '@/components/layout/BottomTabBar';
 import ConfigurationView from '@/components/views/ConfigurationView';
 import CalculationView from '@/components/views/CalculationView';
+import ScenariosView from '@/components/views/ScenariosView';
+import SettingsPanel from '@/components/views/SettingsPanel';
+import AdaptivePanel from '@/components/common/AdaptivePanel';
 import { Scenario, ViewMode, OptimizationResult } from '@/types';
+import { useIsDesktop } from '@/hooks/useMediaQuery';
 
 // Default initial data
 const INITIAL_SCENARIOS: Scenario[] = [
@@ -26,6 +32,7 @@ const INITIAL_SCENARIOS: Scenario[] = [
 ];
 
 function App() {
+  const { t } = useTranslation();
   const [scenarios, setScenarios] = useState<Scenario[]>(() => {
     const saved = localStorage.getItem('optimix_scenarios');
     return saved ? JSON.parse(saved) : INITIAL_SCENARIOS;
@@ -33,15 +40,18 @@ function App() {
 
   const [activeScenarioId, setActiveScenarioId] = useState<string>(scenarios[0].id);
   const [currentView, setCurrentView] = useState<ViewMode>('configuration');
+  const [activeTab, setActiveTab] = useState<TabType>('configuration');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // 主题下拉菜单状态
-  const [isThemeMenuOpen, setIsThemeMenuOpen] = useState(false);
+  const isDesktop = useIsDesktop();
 
-  // ✅ 视图切换动画状态
+  // 设置面板状态
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  // 视图切换动画状态
   const [isViewTransitioning, setIsViewTransitioning] = useState(false);
 
-  // ✅ 方案切换动画状态
+  // 方案切换动画状态
   const [isScenarioTransitioning, setIsScenarioTransitioning] = useState(false);
 
   // 状态栏高度状态
@@ -55,10 +65,10 @@ function App() {
         return savedTheme as 'light' | 'dark' | 'system';
       }
     }
-    return 'system'; // 默认跟随系统
+    return 'system';
   });
 
-  // 实际应用的主题（用于 UI 显示和状态栏样式）
+  // 实际应用的主题
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>(() => {
     if (typeof window !== 'undefined') {
       return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
@@ -77,8 +87,6 @@ function App() {
 
           document.documentElement.style.setProperty('--safe-area-top', `${topInset}px`);
           document.documentElement.style.setProperty('--safe-area-bottom', `${safeAreaData.insets.bottom}px`);
-
-          console.log('Safe area insets:', safeAreaData.insets);
         } catch (error) {
           console.log('SafeArea plugin error:', error);
           setStatusBarHeight(28);
@@ -100,13 +108,11 @@ function App() {
   // 监听系统主题变化
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-
     const handleSystemThemeChange = (e: MediaQueryListEvent) => {
       if (theme === 'system') {
         setResolvedTheme(e.matches ? 'dark' : 'light');
       }
     };
-
     mediaQuery.addEventListener('change', handleSystemThemeChange);
     return () => mediaQuery.removeEventListener('change', handleSystemThemeChange);
   }, [theme]);
@@ -122,7 +128,7 @@ function App() {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  // 更新状态栏样式（根据实际主题）
+  // 更新状态栏样式
   useEffect(() => {
     const updateStatusBarStyle = async () => {
       if (Capacitor.isNativePlatform()) {
@@ -137,11 +143,10 @@ function App() {
         }
       }
     };
-
     updateStatusBarStyle();
   }, [resolvedTheme]);
 
-  // Apply Theme (使用 resolvedTheme)
+  // Apply Theme
   useEffect(() => {
     if (resolvedTheme === 'dark') {
       document.documentElement.classList.add('dark');
@@ -150,50 +155,17 @@ function App() {
     }
   }, [resolvedTheme]);
 
-  // 三种主题循环切换: system -> light -> dark -> system
-  const cycleTheme = () => setTheme(prev => {
-    switch (prev) {
-      case 'system': return 'light';
-      case 'light': return 'dark';
-      case 'dark': return 'system';
-    }
-  });
-
-  // 获取主题图标
-  const getThemeIcon = () => {
-    switch (theme) {
-      case 'light': return <Sun size={20} />;
-      case 'dark': return <Moon size={20} />;
-      case 'system': return <Monitor size={20} />;
-    }
-  };
-
-  // 获取主题提示文字
-  const getThemeTooltip = () => {
-    switch (theme) {
-      case 'light': return '浅色模式 (点击切换到深色)';
-      case 'dark': return '深色模式 (点击切换到跟随系统)';
-      case 'system': return '跟随系统 (点击切换到浅色)';
-    }
-  };
-
   // Persistence
   useEffect(() => {
     localStorage.setItem('optimix_scenarios', JSON.stringify(scenarios));
   }, [scenarios]);
 
-  // ✅ 修改：视图切换动画处理
+  // 视图切换动画处理（PC 端顶部 Tab）
   const handleViewChange = (newView: ViewMode) => {
     if (newView === currentView || isViewTransitioning) return;
-
-    // 开始淡出动画
     setIsViewTransitioning(true);
-
-    // 等待淡出完成后切换视图
     setTimeout(() => {
       setCurrentView(newView);
-
-      // 使用 requestAnimationFrame 确保 DOM 更新后再淡入
       requestAnimationFrame(() => {
         setTimeout(() => {
           setIsViewTransitioning(false);
@@ -202,15 +174,29 @@ function App() {
     }, 200);
   };
 
-  // ✅ 新增：方案切换动画处理
+  // Tab 切换处理（移动端底部 Tab Bar）
+  const handleTabChange = (tab: TabType) => {
+    if (tab === activeTab) return;
+    setIsViewTransitioning(true);
+    setTimeout(() => {
+      setActiveTab(tab);
+      if (tab === 'configuration' || tab === 'calculation') {
+        setCurrentView(tab);
+      }
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          setIsViewTransitioning(false);
+        }, 50);
+      });
+    }, 200);
+  };
+
+  // 方案切换动画处理
   const handleScenarioChange = (newScenarioId: string) => {
     if (newScenarioId === activeScenarioId || isScenarioTransitioning) return;
-
     setIsScenarioTransitioning(true);
-
     setTimeout(() => {
       setActiveScenarioId(newScenarioId);
-
       requestAnimationFrame(() => {
         setTimeout(() => {
           setIsScenarioTransitioning(false);
@@ -234,13 +220,12 @@ function App() {
       indicators: [],
       materials: []
     };
-    // ✅ 添加过渡动画
     setIsScenarioTransitioning(true);
     setTimeout(() => {
       setScenarios(prev => [...prev, newScenario]);
       setActiveScenarioId(newId);
       setCurrentView('configuration');
-
+      setActiveTab('configuration');
       requestAnimationFrame(() => {
         setTimeout(() => {
           setIsScenarioTransitioning(false);
@@ -256,16 +241,13 @@ function App() {
       id: Date.now().toString(),
       name: `导入方案${importCount}`
     };
-
-    // ✅ 添加过渡动画
     setIsScenarioTransitioning(true);
     setIsSidebarOpen(false);
-
     setTimeout(() => {
       setScenarios(prev => [...prev, newScenario]);
       setActiveScenarioId(newScenario.id);
       setCurrentView('configuration');
-
+      setActiveTab('configuration');
       requestAnimationFrame(() => {
         setTimeout(() => {
           setIsScenarioTransitioning(false);
@@ -284,7 +266,6 @@ function App() {
 
   const batchDeleteScenarios = (ids: string[]) => {
     const newScenarios = scenarios.filter(s => !ids.includes(s.id));
-
     if (newScenarios.length === 0) {
       const newId = Date.now().toString();
       const defaultScenario: Scenario = {
@@ -315,8 +296,51 @@ function App() {
     updateActiveScenario(s => ({ ...s, savedOptimizationResult: result }));
   };
 
-  // ✅ 直接使用 currentView
+  // 渲染主内容区域
   const renderContent = () => {
+    // 移动端：根据 activeTab 渲染
+    if (!isDesktop) {
+      switch (activeTab) {
+        case 'configuration':
+          return (
+            <ConfigurationView
+              indicators={activeScenario.indicators}
+              materials={activeScenario.materials}
+              onIndicatorsChange={(inds) => updateActiveScenario(s => ({ ...s, indicators: inds }))}
+              onMaterialsChange={(mats) => updateActiveScenario(s => ({ ...s, materials: mats }))}
+            />
+          );
+        case 'calculation':
+          return (
+            <CalculationView
+              key={activeScenario.id}
+              materials={activeScenario.materials}
+              indicators={activeScenario.indicators}
+              savedRatios={activeScenario.savedManualRatios}
+              savedResult={activeScenario.savedOptimizationResult}
+              onSaveRatios={handleSaveManualRatios}
+              onSaveResult={handleSaveOptimizationResult}
+            />
+          );
+        case 'scenarios':
+          return (
+            <ScenariosView
+              scenarios={scenarios}
+              activeScenarioId={activeScenarioId}
+              onSelect={handleScenarioChange}
+              onAdd={addScenario}
+              onImport={handleImportScenario}
+              onDelete={deleteScenario}
+              onBatchDelete={batchDeleteScenarios}
+              onRename={renameScenario}
+            />
+          );
+        default:
+          return null;
+      }
+    }
+
+    // 桌面端：根据 currentView 渲染
     switch (currentView) {
       case 'configuration':
         return (
@@ -345,129 +369,95 @@ function App() {
   };
 
   return (
-    <div className="flex h-screen bg-slate-50 dark:bg-slate-900 overflow-hidden transition-colors duration-200">
-      {/* Sidebar */}
-      <Sidebar
-        scenarios={scenarios}
-        activeScenarioId={activeScenarioId}
-        onSelect={handleScenarioChange}
-        onAdd={addScenario}
-        onImport={handleImportScenario}
-        onDelete={deleteScenario}
-        onBatchDelete={batchDeleteScenarios}
-        onRename={renameScenario}
-        isOpen={isSidebarOpen}
-        setIsOpen={setIsSidebarOpen}
-        statusBarHeight={statusBarHeight}
-      />
+    <div className="flex h-screen bg-gray-100 dark:bg-slate-900 overflow-hidden transition-colors duration-200">
+      {/* PC 端：侧边栏常驻 */}
+      {isDesktop && (
+        <Sidebar
+          scenarios={scenarios}
+          activeScenarioId={activeScenarioId}
+          onSelect={handleScenarioChange}
+          onAdd={addScenario}
+          onImport={handleImportScenario}
+          onDelete={deleteScenario}
+          onBatchDelete={batchDeleteScenarios}
+          onRename={renameScenario}
+          isOpen={true}
+          setIsOpen={() => {}}
+          statusBarHeight={statusBarHeight}
+        />
+      )}
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col h-full w-full overflow-hidden">
         {/* Top Navigation Bar */}
         <header
-          className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center px-4 justify-between shrink-0 z-10 transition-colors duration-200"
+          className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-lg border-b border-slate-200 dark:border-slate-700 flex items-center px-4 justify-between shrink-0 z-10 transition-colors duration-200"
           style={{
             paddingTop: `${statusBarHeight}px`,
-            minHeight: `${64 + statusBarHeight}px`
+            minHeight: `${56 + statusBarHeight}px`
           }}
         >
-          <div className="flex items-center gap-3 h-16">
-            <button
-              onClick={() => setIsSidebarOpen(true)}
-              className="md:hidden p-2 text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-700 rounded-lg cursor-pointer transition-colors"
-            >
-              <Menu size={20} />
-            </button>
-            <div className="flex items-center gap-2">
-              <Box className="text-blue-600 dark:text-blue-500 hidden sm:block" size={24} />
-              <h1 className="font-bold text-lg text-slate-800 dark:text-white truncate max-w-[150px] sm:max-w-none">
+          <div className="flex items-center gap-3 h-14">
+            <div className="flex items-center gap-2 overflow-hidden">
+              <Box className="text-blue-600 dark:text-blue-500 shrink-0" size={22} />
+              <h1 className="font-bold text-lg text-slate-800 dark:text-white truncate">
                 {activeScenario.name}
               </h1>
             </div>
           </div>
 
-          <div className="flex items-center gap-4 h-16">
-            {/* Module Tabs */}
-            <nav className="flex items-center gap-1 sm:gap-2 bg-slate-100 dark:bg-slate-700 p-1 rounded-lg">
-              <button
-                onClick={() => handleViewChange('configuration')}
-                className={`
-                  flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-md text-sm font-medium transition-all cursor-pointer
-                  ${currentView === 'configuration'
-                    ? 'bg-white dark:bg-slate-600 text-blue-600 dark:text-blue-400 shadow-sm'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-600/50'}
-                `}
-              >
-                <Settings size={16} />
-                <span className="hidden sm:inline">配置</span>
-              </button>
-              <button
-                onClick={() => handleViewChange('calculation')}
-                className={`
-                  flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-md text-sm font-medium transition-all cursor-pointer
-                  ${currentView === 'calculation'
-                    ? 'bg-white dark:bg-slate-600 text-blue-600 dark:text-blue-400 shadow-sm'
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-600/50'}
-                `}
-              >
-                <Activity size={16} />
-                <span className="hidden sm:inline">计算</span>
-              </button>
-            </nav>
+          <div className="flex items-center gap-3 h-14 shrink-0">
+            {/* PC 端：视图切换 Tab */}
+            {isDesktop && (
+              <nav className="flex items-center gap-1 bg-slate-100 dark:bg-slate-700 p-1 rounded-xl">
+                <button
+                  onClick={() => handleViewChange('configuration')}
+                  className={`
+                    flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer active:scale-95 transform
+                    ${currentView === 'configuration'
+                      ? 'bg-white dark:bg-slate-600 text-blue-600 dark:text-blue-400 shadow-sm'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-600/50'}
+                  `}
+                >
+                  <ClipboardList size={16} />
+                  <span>{t('nav.configuration')}</span>
+                </button>
+                <button
+                  onClick={() => handleViewChange('calculation')}
+                  className={`
+                    flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer active:scale-95 transform
+                    ${currentView === 'calculation'
+                      ? 'bg-white dark:bg-slate-600 text-blue-600 dark:text-blue-400 shadow-sm'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-600/50'}
+                  `}
+                >
+                  <Activity size={16} />
+                  <span>{t('nav.calculation')}</span>
+                </button>
+              </nav>
+            )}
 
-            {/* Theme Dropdown Menu */}
-            <div className="relative">
-              <button
-                onClick={() => setIsThemeMenuOpen(!isThemeMenuOpen)}
-                className="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors cursor-pointer flex items-center gap-1"
-                title="切换主题"
-              >
-                {getThemeIcon()}
-                <ChevronDown size={14} className={`transition-transform ${isThemeMenuOpen ? 'rotate-180' : ''}`} />
-              </button>
-
-              {/* Dropdown Menu */}
-              {isThemeMenuOpen && (
-                <>
-                  {/* Backdrop to close menu */}
-                  <div
-                    className="fixed inset-0 z-10"
-                    onClick={() => setIsThemeMenuOpen(false)}
-                  />
-                  <div className="absolute right-0 top-full mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg py-1 min-w-[140px] z-20 animate-in fade-in slide-in-from-top-2 duration-150">
-                    <button
-                      onClick={() => { setTheme('light'); setIsThemeMenuOpen(false); }}
-                      className={`w-full px-3 py-2 text-left text-sm flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors ${theme === 'light' ? 'text-blue-600 dark:text-blue-400 font-medium' : 'text-slate-700 dark:text-slate-300'
-                        }`}
-                    >
-                      <Sun size={16} /> 浅色模式
-                    </button>
-                    <button
-                      onClick={() => { setTheme('dark'); setIsThemeMenuOpen(false); }}
-                      className={`w-full px-3 py-2 text-left text-sm flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors ${theme === 'dark' ? 'text-blue-600 dark:text-blue-400 font-medium' : 'text-slate-700 dark:text-slate-300'
-                        }`}
-                    >
-                      <Moon size={16} /> 深色模式
-                    </button>
-                    <button
-                      onClick={() => { setTheme('system'); setIsThemeMenuOpen(false); }}
-                      className={`w-full px-3 py-2 text-left text-sm flex items-center gap-2 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors ${theme === 'system' ? 'text-blue-600 dark:text-blue-400 font-medium' : 'text-slate-700 dark:text-slate-300'
-                        }`}
-                    >
-                      <Monitor size={16} /> 跟随系统
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
+            {/* 设置按钮 */}
+            <button
+              onClick={() => setIsSettingsOpen(true)}
+              className="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors cursor-pointer active:scale-95 transform"
+              title={t('settings.title')}
+            >
+              <Settings size={20} />
+            </button>
           </div>
         </header>
 
-        {/* ✅ Scrollable Content - 优化动画 */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 flex flex-col">
+        {/* Scrollable Content */}
+        <main
+          className="flex-1 overflow-y-auto p-4 sm:p-5 lg:p-8 flex flex-col"
+          style={{
+            paddingBottom: isDesktop ? undefined : 'calc(4.5rem + env(safe-area-inset-bottom, 0px))'
+          }}
+        >
           <div
             className={`
-               flex-1 
+               flex-1
                transition-all duration-200 ease-out
                will-change-[transform,opacity]
                ${isViewTransitioning || isScenarioTransitioning
@@ -477,19 +467,37 @@ function App() {
           >
             {renderContent()}
           </div>
-          <footer
-            className="mt-12 text-center text-xs text-slate-400 dark:text-slate-600 space-y-1"
-            style={{
-              paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom, 0px))'
-            }}
-          >
-            <p>
-              <a href="https://github.com/JVxie/Optmix" target="_blank" rel="noopener noreferrer" className="hover:text-slate-600 dark:hover:text-slate-400 transition-colors font-medium">OptiMix</a> v2.1.1 · © <a href="https://jvxie.com" target="_blank" rel="noopener noreferrer" className="hover:text-slate-600 dark:hover:text-slate-400 transition-colors font-medium">JVxie</a> 2026
-            </p>
-            <p className="opacity-75 scale-90">Generated by Gemini</p>
-          </footer>
+          {/* Footer - 仅桌面端显示 */}
+          {isDesktop && (
+            <footer className="mt-12 text-center text-xs text-slate-400 dark:text-slate-600 space-y-1 pb-2">
+              <p>
+                <a href="https://github.com/JVxie/Optmix" target="_blank" rel="noopener noreferrer" className="hover:text-slate-600 dark:hover:text-slate-400 transition-colors font-medium">OptiMix</a> v2.2.0 · © <a href="https://jvxie.com" target="_blank" rel="noopener noreferrer" className="hover:text-slate-600 dark:hover:text-slate-400 transition-colors font-medium">JVxie</a> 2026
+              </p>
+              <p className="opacity-75 scale-90">{t('footer.generatedBy')}</p>
+            </footer>
+          )}
         </main>
       </div>
+
+      {/* 移动端：底部 Tab Bar */}
+      {!isDesktop && (
+        <BottomTabBar
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+        />
+      )}
+
+      {/* 设置面板 */}
+      <AdaptivePanel
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        title={t('settings.title')}
+      >
+        <SettingsPanel
+          theme={theme}
+          onThemeChange={setTheme}
+        />
+      </AdaptivePanel>
     </div>
   );
 }
