@@ -34,7 +34,14 @@
     "aboutTitle": "About OptiMix",
     "appName": "App Name",
     "version": "Version",
-    "author": "Author"
+    "author": "Author",
+    "installApp": "Install App",
+    "installAppTitle": "Save to Home Screen",
+    "installAppDesc": "Install as standalone app with offline support",
+    "iosInstallGuideTitle": "iOS Installation Guide",
+    "iosInstallStep1": "Tap the Share button at the bottom of Safari (square with arrow icon)",
+    "iosInstallStep2": "Select \"Add to Home Screen\" from the menu",
+    "iosInstallStep3": "Tap \"Add\" in the top right corner to complete"
   },
   "config": {
     "indicatorManager": "Indicators",

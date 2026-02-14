@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Sun, Moon, Monitor, Globe, ExternalLink, Info, ChevronDown, Check } from 'lucide-react';
+import { Sun, Moon, Monitor, Globe, ExternalLink, Info, ChevronDown, Check, Download, Share } from 'lucide-react';
+import { useInstallPrompt } from '@/hooks/useInstallPrompt';
 
 type ThemeOption = 'light' | 'dark' | 'system';
 
@@ -92,10 +93,20 @@ const sectionTitleClassName =
 
 const SettingsPanel: React.FC<SettingsPanelProps> = ({ theme, onThemeChange }) => {
   const { t, i18n } = useTranslation();
+  const { canInstall, isIOS, install } = useInstallPrompt();
+  const [showIOSGuide, setShowIOSGuide] = useState(false);
 
   const handleLanguageChange = (lang: string) => {
     i18n.changeLanguage(lang);
     localStorage.setItem('language', lang);
+  };
+
+  const handleInstall = async () => {
+    if (isIOS) {
+      setShowIOSGuide(true);
+    } else {
+      await install();
+    }
   };
 
   const themeOptions: Option[] = [
@@ -135,6 +146,58 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ theme, onThemeChange }) =
         />
       </div>
 
+      {/* 安装应用 - 仅在移动端浏览器中显示 */}
+      {canInstall && (
+        <div>
+          <h4 className={sectionTitleClassName}>
+            {t('settings.installApp')}
+          </h4>
+          <button
+            onClick={handleInstall}
+            className="flex items-center gap-4 w-full px-4 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl hover:from-blue-100 hover:to-indigo-100 dark:hover:from-blue-900/30 dark:hover:to-indigo-900/30 transition-all cursor-pointer group active:scale-[0.98] transform"
+          >
+            <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform">
+              <Download size={20} />
+            </div>
+            <div className="flex-1 text-left">
+              <div className="text-base font-bold text-slate-800 dark:text-slate-200">
+                {t('settings.installAppTitle')}
+              </div>
+              <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                {t('settings.installAppDesc')}
+              </div>
+            </div>
+          </button>
+
+          {/* iOS 安装引导弹窗 */}
+          {showIOSGuide && (
+            <div className="mt-3 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0 mt-0.5">
+                  <Share size={16} />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-amber-800 dark:text-amber-300 mb-2">
+                    {t('settings.iosInstallGuideTitle')}
+                  </p>
+                  <ol className="text-xs text-amber-700 dark:text-amber-400 space-y-1.5 list-decimal list-inside">
+                    <li>{t('settings.iosInstallStep1')}</li>
+                    <li>{t('settings.iosInstallStep2')}</li>
+                    <li>{t('settings.iosInstallStep3')}</li>
+                  </ol>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowIOSGuide(false)}
+                className="mt-3 w-full text-center text-xs text-amber-600 dark:text-amber-400 font-medium py-1.5 hover:bg-amber-100 dark:hover:bg-amber-900/30 rounded-lg transition-colors"
+              >
+                {t('common.ok')}
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* 关于 */}
       <div>
         <h4 className={sectionTitleClassName}>
@@ -154,7 +217,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({ theme, onThemeChange }) =
               OptiMix
             </div>
             <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              {t('settings.version')} v2.2.0
+              {t('settings.version')} v2.2.1
             </div>
           </div>
           <ExternalLink size={16} className="text-slate-400 dark:text-slate-500 group-hover:text-blue-500 transition-colors" />

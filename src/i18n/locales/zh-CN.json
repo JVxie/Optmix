@@ -34,7 +34,14 @@
     "aboutTitle": "关于 OptiMix",
     "appName": "应用名称",
     "version": "版本",
-    "author": "作者"
+    "author": "作者",
+    "installApp": "安装应用",
+    "installAppTitle": "保存到桌面",
+    "installAppDesc": "安装为独立应用，支持离线使用",
+    "iosInstallGuideTitle": "iOS 安装指引",
+    "iosInstallStep1": "点击 Safari 底部的分享按钮（方框+箭头图标）",
+    "iosInstallStep2": "在弹出菜单中选择「添加到主屏幕」",
+    "iosInstallStep3": "点击右上角「添加」即可完成安装"
   },
   "config": {
     "indicatorManager": "指标管理",

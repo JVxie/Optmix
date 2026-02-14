@@ -99,6 +99,19 @@ function App() {
         } catch (error) {
           console.log('StatusBar plugin error:', error);
         }
+      } else {
+        // Web/PWA 模式：使用 CSS env() 处理安全区域
+        // 检测 standalone 模式（PWA 已安装）
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches
+          || (window.navigator as any).standalone === true;
+
+        if (isStandalone) {
+          // PWA standalone 模式下使用 env() 安全区域
+          document.documentElement.style.setProperty('--safe-area-top', 'env(safe-area-inset-top, 0px)');
+          document.documentElement.style.setProperty('--safe-area-bottom', 'env(safe-area-inset-bottom, 0px)');
+          // 标记为使用 CSS env()，不使用固定数值
+          setStatusBarHeight(-1); // -1 表示使用 CSS 变量
+        }
       }
     };
 
@@ -389,7 +402,7 @@ function App() {
           onBatchDelete={batchDeleteScenarios}
           onRename={renameScenario}
           isOpen={true}
-          setIsOpen={() => {}}
+          setIsOpen={() => { }}
           statusBarHeight={statusBarHeight}
         />
       )}
@@ -399,10 +412,17 @@ function App() {
         {/* Top Navigation Bar */}
         <header
           className="bg-white/95 dark:bg-slate-800/95 backdrop-blur-lg border-b border-slate-200 dark:border-slate-700 flex items-center px-4 justify-between shrink-0 z-10 transition-colors duration-200"
-          style={{
-            paddingTop: `${statusBarHeight}px`,
-            minHeight: `${56 + statusBarHeight}px`
-          }}
+          style={
+            statusBarHeight === -1
+              ? {
+                paddingTop: 'var(--safe-area-top, env(safe-area-inset-top, 0px))',
+                minHeight: 'calc(56px + var(--safe-area-top, env(safe-area-inset-top, 0px)))',
+              }
+              : {
+                paddingTop: `${statusBarHeight}px`,
+                minHeight: `${56 + statusBarHeight}px`,
+              }
+          }
         >
           <div className="flex items-center gap-3 h-14">
             <div className="flex items-center gap-2 overflow-hidden">
@@ -478,7 +498,7 @@ function App() {
           {isDesktop && (
             <footer className="mt-12 text-center text-xs text-slate-400 dark:text-slate-600 space-y-1 pb-2">
               <p>
-                <a href="https://github.com/JVxie/Optmix" target="_blank" rel="noopener noreferrer" className="hover:text-slate-600 dark:hover:text-slate-400 transition-colors font-medium">OptiMix</a> v2.2.0 · © <a href="https://jvxie.com" target="_blank" rel="noopener noreferrer" className="hover:text-slate-600 dark:hover:text-slate-400 transition-colors font-medium">JVxie</a> 2026
+                <a href="https://github.com/JVxie/Optmix" target="_blank" rel="noopener noreferrer" className="hover:text-slate-600 dark:hover:text-slate-400 transition-colors font-medium">OptiMix</a> v2.2.1 · © <a href="https://jvxie.com" target="_blank" rel="noopener noreferrer" className="hover:text-slate-600 dark:hover:text-slate-400 transition-colors font-medium">JVxie</a> 2026
               </p>
               <p className="opacity-75 scale-90">{t('footer.generatedBy')}</p>
             </footer>
